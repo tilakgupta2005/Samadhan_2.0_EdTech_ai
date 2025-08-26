@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Calculator</title>
+  <style>
+    /* reset and base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* body center bg */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #6e8efb, #a777e3);
+      padding: 20px;
+    }
+
+    .title {
+      width: 400px;
+      height: 40px;
+      position: absolute;
+      text-align: center;
+      top: 30px;
+      left: 410px;
+      margin: auto;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      color: #ecf0f1;
+      background-color: #34495e;
+    }
+
+    /* calculator box */
+    .calculator {
+      width: 460px;
+      background-color: #2c3e50;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+    
+    /* display area */
+    #result {
+      width: 100%;
+      height: 100px;
+      background-color: #34495e;
+      color: #ecf0f1;
+      border: none;
+      padding: 20px;
+      font-size: 2.2rem;
+      text-align: right;
+      outline: none;
+      caret-color: transparent;
+      cursor: default;
+    }
+    
+    #result::placeholder {
+      color: #95a5a6;
+    }
+    
+    /* buttons grid */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background-color: #34495e;
+    }
+    
+    /* button look */
+    .btn {
+      border: none;
+      padding: 20px;
+      font-size: 1.5rem;
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: #34495e;
+    }
+    
+    .btn:active {
+      background-color: #1e2a36;
+    }
+    
+    /* operator color */
+    .btn[data-value="/"],
+    .btn[data-value="*"],
+    .btn[data-value="-"],
+    .btn[data-value="+"] {
+      background-color: #3498db;
+    }
+    
+    /* equal btn */
+    .equal {
+      background-color: #2ecc71 !important;
+      grid-column: span 1;
+    }
+    
+    /* clear btn */
+    .clear {
+      background-color: #e74c3c !important;
+    }
+    
+    /* bracket btn */
+    .btn[data-value="("],
+    .btn[data-value=")"] {
+      background-color: #9b59b6;
+    }
+    
+    /* percent btn */
+    .btn[data-value="%"] {
+      background-color: #f39c12;
+    }
+    
+    /* responsive small screen */
+    @media (max-width: 350px) {
+      .calculator {
+        width: 280px;
+      }
+      
+      .btn {
+        padding: 15px;
+        font-size: 1.2rem;
+      }
+      
+      #result {
+        height: 80px;
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Simple Calculator</div>
+  <div class="calculator">
+    <!-- result box -->
+    <input type="text" id="result" readonly title="Calculator result" placeholder="0">
+    
+    <!-- buttons -->
+    <div class="buttons">
+      <button class="btn" data-value="(">(</button>
+      <button class="btn" data-value=")">)</button>
+      <button class="btn" data-value="%">%</button>
+      <button class="btn" data-value="/">/</button>
+
+      <button class="btn" data-value="7">7</button>
+      <button class="btn" data-value="8">8</button>
+      <button class="btn" data-value="9">9</button>
+      <button class="btn" data-value="*">*</button>
+
+      <button class="btn" data-value="4">4</button>
+      <button class="btn" data-value="5">5</button>
+      <button class="btn" data-value="6">6</button>
+      <button class="btn" data-value="-">-</button>
+
+      <button class="btn" data-value="1">1</button>
+      <button class="btn" data-value="2">2</button>
+      <button class="btn" data-value="3">3</button>
+      <button class="btn" data-value="+">+</button>
+
+      <button class="btn" data-value="0">0</button>
+      <button class="btn" data-value=".">.</button>
+      <button class="btn clear">C</button>
+      <button class="btn equal">=</button>
+    </div>
+  </div>
+
+  <script>
+    // get elements
+    const result = document.getElementById("result");
+    const buttons = document.querySelectorAll(".btn");
+    
+    let currentInput = "";
+    let shouldResetDisplay = false;
+    
+    // button clicks
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        const value = button.getAttribute("data-value");
+        
+        if (value) {
+          // add num/op
+          appendValue(value);
+        } else if (button.classList.contains("equal")) {
+          // press equal
+          calculate();
+        } else if (button.classList.contains("clear")) {
+          // press clear
+          clearResult();
+        }
+      });
+    });
+    
+    // add value
+    function appendValue(val) {
+      if (shouldResetDisplay) {
+        result.value = "";
+        shouldResetDisplay = false;
+      }
+      
+      // stop double dot
+      if (val === "." && result.value.includes(".")) {
+        const operators = ["+", "-", "*", "/"];
+        const lastOperatorIndex = Math.max(...operators.map(op => result.value.lastIndexOf(op)));
+        
+        if (lastOperatorIndex === -1 || result.value.slice(lastOperatorIndex + 1).includes(".")) {
+          return;
+        }
+      }
+      
+      // stop double operator
+      const lastChar = result.value.slice(-1);
+      const operators = ["+", "-", "*", "/"];
+      
+      if (operators.includes(val) && operators.includes(lastChar)) {
+        result.value = result.value.slice(0, -1) + val;
+        return;
+      }
+      
+      result.value += val;
+    }
+    
+    // clear fn
+    function clearResult() {
+      result.value = "";
+      currentInput = "";
+    }
+    
+    // calculate fn
+    function calculate() {
+      try {
+        if (result.value) {
+          const calculateFn = new Function('return ' + result.value);
+          const calculatedValue = calculateFn();
+          
+          // div by 0 check
+          if (!isFinite(calculatedValue)) {
+            result.value = "Error";
+          } else {
+            result.value = calculatedValue;
+            shouldResetDisplay = true;
+          }
+        }
+      } catch (error) {
+        result.value = "Error";
+      }
+    }
+    
+    // keyboard input
+    document.addEventListener("keydown", (event) => {
+      if (!isNaN(event.key) || "+-*/.".includes(event.key) || event.key === "(" || event.key === ")" || event.key === "%") {
+        appendValue(event.key);
+      } else if (event.key === "Enter" || event.key === "=") {
+        calculate();
+      } else if (event.key === "Backspace") {
+        result.value = result.value.slice(0, -1);
+      } else if (event.key === "Escape" || event.key === "c" || event.key === "C") {
+        clearResult();
+      }
+    });
+  </script>
+</body>
+</html>
