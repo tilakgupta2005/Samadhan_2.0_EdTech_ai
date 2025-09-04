@@ -1,0 +1,27 @@
+# Node modules
+node_modules/
+todo-backend/node_modules/
+todo-frontend/node_modules/
+
+# Build outputs
+todo-frontend/build/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files
+*.env
+*.local
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Misc
+*.log
